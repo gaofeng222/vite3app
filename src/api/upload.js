@@ -10,3 +10,11 @@ export const uploadFileApi = (data) => {
     },
   });
 };
+
+export const mergeChunks = (data) => {
+  return request({
+    url: "/upload/merge",
+    method: "post",
+    data,
+  });
+};

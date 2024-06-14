@@ -12,7 +12,7 @@
 
 <script setup>
 import { ref } from "vue";
-import { uploadFileApi } from "../api/upload.js";
+import { uploadFileApi, mergeChunks } from "../api/upload.js";
 
 const fileInput = ref(null);
 let uploadFile = ref(null);
@@ -20,12 +20,10 @@ const uploadChunkList = ref([]);
 const uploadHandleFile = e => {
   const files = fileInput.value.files[0];
   uploadFile.value = files;
-  console.log("🚀 ~ uploadFile ~ files:", files);
 };
 const handleUpload = () => {
   if (!uploadFile.value) return;
   const chunkList = createChunk(uploadFile.value);
-  console.log("🚀 ~ handleUpload ~ chunkList:", chunkList);
   // 另外切片需要打上标记，保证后端正确合并
   uploadChunkList.value = chunkList.map(({ file }, index) => {
     return {
@@ -37,10 +35,6 @@ const handleUpload = () => {
       index
     };
   });
-  console.log(
-    "🚀 ~ uploadChunkList.value=chunkList.map ~ uploadChunkList.value:",
-    uploadChunkList.value
-  );
   // 开始上传
   uploadChunks();
 };
@@ -54,7 +48,6 @@ const createChunk = (file, chunkSize = 1024 * 1024) => {
   }
   return chunkList;
 };
-
 const uploadChunks = async () => {
   const formateLists = uploadChunkList.value.map((chunk, index) => {
     const formData = new FormData();
@@ -67,8 +60,13 @@ const uploadChunks = async () => {
   const requestLists = formateLists.map(item => {
     return uploadFileApi(item.formData);
   });
+  console.log("🚀 ~ requestLists ~ requestLists:", requestLists);
+  await Promise.all(requestLists);
+  mergeApiChunks();
 };
+function mergeApiChunks() {
+  mergeChunks({ fileName: uploadFile.value.name, size: 2 * 1024 * 1024 });
+}
 </script>
 
-<style>
-</style>
+<style></style>;

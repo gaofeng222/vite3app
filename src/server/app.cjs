@@ -1,7 +1,10 @@
 const express = require("express");
 const app = express();
 const uploadRouter = require("./router/uploadRouter.cjs");
+const bodyParser = require("body-parser");
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 //express 跨域
 app.all("*", function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
